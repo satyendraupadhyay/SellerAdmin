@@ -1,32 +1,33 @@
 var form = document.getElementById('my-form');
 
-form.addEventListener('submit', getValue);
+form.addEventListener('submit', function getValue(event){
+    event.preventDefault();
 
-async function getValue(e) {
-    e.preventDefault();
+    var price = event.target.price.value;
+    var name = event.target.name.value;
+    var category = event.target.category.value;
 
-    var getPrice = document.getElementById('price').value;
-    var getName = document.getElementById('name').value;
-    var getCategory = document.getElementById('category').value;
-
-    var productDetails = {
-        price: getPrice,
-        name: getName,
-        category: getCategory
-    };
-
-    try {
-        const res = await axios.post('https://crudcrud.com/api/8c8091e76039414086053ce63662cdce/seller', productDetails);
-        showUser(res.data);
-        console.log(res);
-    } catch (err) {
-        console.log(err);
+    const obj = {
+        price,
+        name,
+        category
     }
-}
+
+    axios.post("http://localhost:3000/expense/add-expense", obj)
+    .then((response) => {
+        console.log(response);
+        showUser(response.data.newExpenseDetail);
+    })
+    .catch((err) => {
+        document.body.innerHTML = document.body.innerHTML + "<h4>Something went wrong</h4>";
+        console.log(err);
+    })
+
+});
 
 function showUser(productDetails) {
     let parent = null;
-    var itemID = productDetails._id;
+    var itemID = productDetails.id;
     console.log(itemID);
 
     if (productDetails.category === "Electronic") {
@@ -44,7 +45,7 @@ function showUser(productDetails) {
         
         btn.addEventListener('click', async function() {
             try {
-                await axios.delete(`https://crudcrud.com/api/8c8091e76039414086053ce63662cdce/seller/${itemID}`);
+                await axios.delete(`http://localhost:3000/expense/delete-expense/${itemID}`);
                 parent.removeChild(child);
             } catch (err) {
                 console.log(err);
@@ -60,7 +61,7 @@ function showUser(productDetails) {
 // GET the saved User Details from crudcrud.
 window.addEventListener("DOMContentLoaded", async () => {
     try {
-        const res = await axios.get("https://crudcrud.com/api/8c8091e76039414086053ce63662cdce/seller");
+        const res = await axios.get("http://localhost:3000/expense/get-expense");
         for (var i = 0; i < res.data.length; i++) {
             showUser(res.data[i]);
         }
